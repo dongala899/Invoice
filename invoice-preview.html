@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Invoice Preview | DigiDat InfoSystems</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <script src="js/server-session.js?v=20260328b"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+</head>
+<body class="standalone-preview-page" data-preview-page="true">
+  <div class="container">
+    <section class="preview-page-shell">
+      <div class="preview-page-header">
+        <div>
+          <h2>Invoice Preview</h2>
+        </div>
+        <div class="export-buttons preview-page-actions">
+          <button class="btn btn-warning" onclick="returnToInvoiceEditor()">Back to Invoice</button>
+          <button id="saveInvoiceBtn" class="btn btn-primary" onclick="saveInvoice()">Save Invoice</button>
+          <button class="btn btn-success" onclick="printInvoice()">Print (2 Copies)</button>
+          <button class="btn btn-success" onclick="exportToPDF()">Download PDF</button>
+        </div>
+      </div>
+
+      <div id="invoicePreview" class="empty-state">
+        <p>Open an invoice from the editor to see the preview here.</p>
+      </div>
+    </section>
+  </div>
+
+  <script src="js/invoice.js?v=20260328b"></script>
+  <script src="js/storage.js?v=20260328b"></script>
+  <script src="js/pdf-assets.js?v=20260328b"></script>
+  <script src="js/file-storage-bridge.js?v=20260328b"></script>
+  <script src="js/auth.js?v=20260328b"></script>
+  <script src="js/app.js?v=20260328b"></script>
+</body>
+</html>

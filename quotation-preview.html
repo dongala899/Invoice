@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quotation Preview | DigiDat InfoSystems</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <style>
+    body {
+      background: #e8ecf0;
+    }
+
+    .preview-toolbar {
+      background: #fff;
+      border-bottom: 1px solid #dbe1ea;
+      padding: 12px 24px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .preview-toolbar h2 {
+      margin: 0;
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #1f2937;
+      flex: 1;
+    }
+
+    #quotationPreview {
+      width: 210mm;
+      min-height: 297mm;
+      margin: 24px auto;
+      background: #fff;
+      padding: 18mm 16mm;
+      box-shadow: 0 4px 24px rgba(15,23,42,0.12);
+      font-family: "Source Serif 4", Georgia, "Times New Roman", serif;
+      font-size: 10.8px;
+      color: #111827;
+      line-height: 1.5;
+    }
+
+    /* Letterhead */
+    .q-letterhead {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      margin-bottom: 14px;
+      padding-bottom: 10px;
+      border-bottom: 2px solid #1f2937;
+    }
+
+    .q-letterhead-left {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 6px;
+    }
+
+    .q-letterhead-logo {
+      max-width: 80px;
+      max-height: 60px;
+      object-fit: contain;
+    }
+
+    .q-letterhead-info {
+      text-align: left;
+      font-family: "Manrope", "Segoe UI", Arial, sans-serif;
+      max-width: 220px;
+      word-wrap: break-word;
+      word-break: break-word;
+    }
+
+    .q-company-name {
+      font-size: 18px;
+      font-weight: 800;
+      color: #1a3a6b;
+      margin-bottom: 3px;
+      font-family: "Manrope", "Segoe UI", Arial, sans-serif;
+    }
+
+    .q-company-detail {
+      font-size: 9.5px;
+      color: #374151;
+      margin: 1px 0;
+    }
+
+    .q-company-gstin {
+      font-size: 9px;
+      color: #6b7280;
+      margin-top: 3px;
+    }
+
+    /* Document title */
+    .q-doc-title {
+      text-align: center;
+      font-family: "Manrope", "Segoe UI", Arial, sans-serif;
+      font-size: 13px;
+      font-weight: 800;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: #1f2937;
+      margin: 12px 0 10px;
+      padding-bottom: 6px;
+      border-bottom: 1px solid #dbe1ea;
+    }
+
+    /* Ref + Date row */
+    .q-meta-row {
+      display: flex;
+      justify-content: space-between;
+      font-family: "Manrope", "Segoe UI", Arial, sans-serif;
+      font-size: 9.5px;
+      font-weight: 600;
+      color: #374151;
+      margin-bottom: 10px;
+    }
+
+    /* Customer block */
+    .q-customer-block {
+      margin-bottom: 12px;
+      font-size: 10px;
+    }
+
+    .q-customer-label {
+      font-family: "Manrope", "Segoe UI", Arial, sans-serif;
+      font-size: 8.5px;
+      font-weight: 800;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      color: #6b7280;
+      margin-bottom: 3px;
+    }
+
+    .q-customer-name {
+      font-weight: 700;
+      font-size: 11px;
+      color: #111827;
+    }
+
+    .q-customer-address {
+      color: #374151;
+      font-size: 9.5px;
+      margin-top: 2px;
+    }
+
+    /* Covering letter */
+    .q-section-label {
+      font-family: "Manrope", "Segoe UI", Arial, sans-serif;
+      font-size: 8.5px;
+      font-weight: 800;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      color: #6b7280;
+      margin: 12px 0 4px;
+    }
+
+    .q-covering-letter {
+      font-size: 10px;
+      color: #1f2937;
+      white-space: pre-wrap;
+      line-height: 1.6;
+      margin-bottom: 12px;
+    }
+
+    /* Quotation table */
+    .q-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 6px;
+      font-size: 9.5px;
+      border: 1px solid #9ca3af;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .q-table thead tr {
+      background: #1f2937;
+      color: #fff;
+      print-color-adjust: exact;
+      -webkit-print-color-adjust: exact;
+    }
+
+    .q-table thead th {
+      font-family: "Manrope", "Segoe UI", Arial, sans-serif;
+      font-weight: 700;
+      padding: 6px 7px;
+      text-align: center;
+      white-space: nowrap;
+      border: 1px solid #374151;
+      background: #1f2937;
+      color: #fff;
+      print-color-adjust: exact;
+      -webkit-print-color-adjust: exact;
+    }
+
+    .q-table thead th:nth-child(2) {
+      text-align: left;
+    }
+
+    .q-table thead th:nth-child(3),
+    .q-table thead th:nth-child(5),
+    .q-table thead th:nth-child(7),
+    .q-table thead th:nth-child(8) {
+      text-align: right;
+    }
+
+    .q-table tbody td {
+      padding: 5px 7px;
+      border: 1px solid #9ca3af;
+      vertical-align: top;
+      text-align: center;
+    }
+
+    .q-table tbody td:nth-child(2) {
+      text-align: left;
+    }
+
+    .q-table tbody td:nth-child(1),
+    .q-table tbody td:nth-child(4),
+    .q-table tbody td:nth-child(6),
+    .q-table tbody td:nth-child(7),
+    .q-table tbody td:nth-child(8) {
+      text-align: center;
+      white-space: nowrap;
+    }
+
+    .q-table tbody td:nth-child(1) {
+      text-align: center;
+    }
+
+    .q-table tbody td:nth-child(3),
+    .q-table tbody td:nth-child(5),
+    .q-table tbody td:nth-child(7),
+    .q-table tbody td:nth-child(8),
+    .q-table tfoot td:last-child,
+    .q-grand-total-row td:last-child {
+      text-align: right;
+      white-space: nowrap;
+    }
+
+    .q-table tbody tr:nth-child(even) {
+      background: #f9fafb;
+    }
+
+    .q-grand-total-row td {
+      font-family: "Manrope", "Segoe UI", Arial, sans-serif;
+      font-weight: 800;
+      font-size: 10px;
+      background: #f1f5f9 !important;
+      border: 1px solid #9ca3af;
+      padding: 6px 7px;
+      print-color-adjust: exact;
+      -webkit-print-color-adjust: exact;
+    }
+
+    /* Business terms */
+    .q-terms {
+      font-size: 9.5px;
+      color: #374151;
+      white-space: pre-wrap;
+      line-height: 1.6;
+      margin-bottom: 16px;
+    }
+
+    /* Signature block */
+    .q-signature-block {
+      margin-top: 20px;
+      text-align: right;
+      font-family: "Manrope", "Segoe UI", Arial, sans-serif;
+    }
+
+    .q-signature-for {
+      font-size: 10px;
+      font-weight: 700;
+      color: #1f2937;
+      margin-bottom: 4px;
+    }
+
+    .q-signature-img {
+      max-width: 100px;
+      max-height: 50px;
+      object-fit: contain;
+      display: block;
+      margin: 0 0 4px auto;
+    }
+
+    .q-signature-name {
+      font-size: 9.5px;
+      color: #374151;
+      border-top: 1px solid #9ca3af;
+      padding-top: 4px;
+      display: inline-block;
+      min-width: 120px;
+    }
+
+    .q-authorised-label {
+      font-size: 8.5px;
+      color: #6b7280;
+      margin-top: 2px;
+    }
+
+    /* Empty / error state */
+    .q-empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: #6b7280;
+      font-family: "Manrope", "Segoe UI", Arial, sans-serif;
+      font-size: 14px;
+    }
+
+    /* Page break between covering letter and quotation table */
+    .q-page-break {
+      page-break-after: always;
+      break-after: page;
+    }
+
+    @media screen {
+      .q-page-break {
+        border-top: 2px dashed #cbd5e1;
+        margin: 24px 0;
+        position: relative;
+      }
+      .q-page-break::after {
+        content: '— Page 2 —';
+        position: absolute;
+        top: -10px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: #fff;
+        padding: 0 10px;
+        font-size: 9px;
+        color: #94a3b8;
+        font-family: "Manrope", sans-serif;
+      }
+    }
+
+    /* Print styles */
+    @media print {
+      body {
+        background: #fff;
+      }
+
+      .preview-toolbar {
+        display: none !important;
+      }
+
+      #quotationPreview {
+        width: 100%;
+        margin: 0;
+        padding: 10mm 12mm;
+        box-shadow: none;
+      }
+    }
+  </style>
+</head>
+<body class="standalone-preview-page" data-preview-page="true">
+
+  <div class="preview-toolbar">
+    <h2>Quotation Preview</h2>
+    <button class="btn btn-success" onclick="window.print()">&#128438; Print / Save as PDF</button>
+    <button class="btn btn-warning" onclick="window.close()">Close</button>
+  </div>
+
+  <div id="quotationPreview" class="q-empty-state">
+    <p>Loading quotation data&hellip;</p>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      var raw = localStorage.getItem('currentQuotationPreview');
+      localStorage.removeItem('currentQuotationPreview');
+
+      var container = document.getElementById('quotationPreview');
+
+      if (!raw) {
+        container.innerHTML = '<p>No quotation data found.</p>';
+        return;
+      }
+
+      var q;
+      try {
+        q = JSON.parse(raw);
+      } catch (e) {
+        container.innerHTML = '<p>No quotation data found.</p>';
+        return;
+      }
+
+      if (!q || !q.refNumber) {
+        container.innerHTML = '<p>No quotation data found.</p>';
+        return;
+      }
+
+      // Read company data
+      var company = {};
+      try {
+        company = JSON.parse(localStorage.getItem('appCompany') || '{}');
+      } catch (e) {
+        company = {};
+      }
+
+      var companyName    = company.name    || 'DigiDat InfoSystems';
+      var companyAddress = company.address || '';
+      var companyPhone   = company.phone   || '';
+      var companyEmail   = company.email   || '';
+      var companyGstin   = company.gstin   || '';
+      var signatory      = company.signatory || company.name || 'DigiDat InfoSystems';
+
+      // Logo and signature are static assets
+      var logoSrc     = 'assets/Logo.jpeg';
+      var signatureSrc = 'assets/Signature.jpeg';
+
+      // Format date helper
+      function fmtDate(dateStr) {
+        if (!dateStr) return '';
+        var d = new Date(dateStr + 'T00:00:00');
+        if (isNaN(d)) return dateStr;
+        return d.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+      }
+
+      // Format currency helper
+      function fmtCurrency(val) {
+        var n = parseFloat(val) || 0;
+        return '\u20B9' + n.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      }
+
+      // Escape HTML helper
+      function esc(str) {
+        return String(str || '')
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;');
+      }
+
+      // Build letterhead — logo + company name left, address/contact right (matches PDF sample)
+      var letterheadHtml =
+        '<div class="q-letterhead">' +
+          '<div class="q-letterhead-left">' +
+            '<img src="' + logoSrc + '" alt="Logo" class="q-letterhead-logo" onerror="this.style.display=\'none\'">' +
+            '<div class="q-company-name">' + esc(companyName) + '</div>' +
+          '</div>' +
+          '<div class="q-letterhead-info">' +
+            (companyAddress ? '<div class="q-company-detail">' + esc(companyAddress) + '</div>' : '') +
+            (companyPhone   ? '<div class="q-company-detail">Ph.: ' + esc(companyPhone) + '</div>' : '') +
+            (companyEmail   ? '<div class="q-company-detail">Email: ' + esc(companyEmail) + '</div>' : '') +
+            (companyGstin   ? '<div class="q-company-gstin">GSTIN: ' + esc(companyGstin) + '</div>' : '') +
+          '</div>' +
+        '</div>';
+
+      // Document title
+      var titleHtml = '<div class="q-doc-title">Quotation</div>';
+
+      // Ref + Date row
+      var metaHtml =
+        '<div class="q-meta-row">' +
+          '<span>Ref No: <strong>' + esc(q.refNumber) + '</strong></span>' +
+          '<span>Date: <strong>' + esc(fmtDate(q.quotationDate)) + '</strong></span>' +
+        '</div>';
+
+      // Customer block — formal letter style matching PDF
+      var customerName    = (q.customer && q.customer.name)    ? q.customer.name    : '';
+      var customerAddress = (q.customer && q.customer.address) ? q.customer.address : '';
+      var customerHtml =
+        '<div class="q-customer-block">' +
+          '<div class="q-customer-label">To,</div>' +
+          '<div class="q-customer-name">M/s. ' + esc(customerName) + '</div>' +
+          (customerAddress ? '<div class="q-customer-address">' + esc(customerAddress) + '</div>' : '') +
+        '</div>';
+
+      // Covering letter — "Dear Sir," salutation + body (matches PDF style)
+      var coveringLetterHtml = '';
+      if (q.coveringLetter) {
+        coveringLetterHtml =
+          '<div class="q-covering-letter">' + esc(q.coveringLetter) + '</div>';
+      }
+
+      // Quotation table — titled "QUOTATION" matching PDF
+      var quotationTableTitle = '<div class="q-doc-title">QUOTATION</div>';
+      var lineItems = Array.isArray(q.lineItems) ? q.lineItems : [];
+      var tableRows = '';
+      lineItems.forEach(function (item, idx) {
+        tableRows +=
+          '<tr>' +
+            '<td>' + (idx + 1) + '</td>' +
+            '<td>' + esc(item.description || '') + (item.comments ? '<br><span style="font-size:0.85em;color:#555;">' + esc(item.comments) + '</span>' : '') + '</td>' +
+            '<td>' + fmtCurrency(item.unitPrice) + '</td>' +
+            '<td>' + esc(item.qty) + '</td>' +
+            '<td>' + fmtCurrency(item.total) + '</td>' +
+            '<td>' + esc(item.taxPct) + '%</td>' +
+            '<td>' + fmtCurrency(item.taxAmount) + '</td>' +
+            '<td>' + fmtCurrency(item.totalAmount) + '</td>' +
+          '</tr>';
+      });
+
+      var tableHtml =
+        '<table class="q-table">' +
+          '<thead><tr>' +
+            '<th>SL No</th>' +
+            '<th>Description</th>' +
+            '<th>Unit Price</th>' +
+            '<th>Qty</th>' +
+            '<th>Total</th>' +
+            '<th>Tax%</th>' +
+            '<th>Tax Amount</th>' +
+            '<th>Total Amount</th>' +
+          '</tr></thead>' +
+          '<tbody>' + tableRows + '</tbody>' +
+          '<tfoot>' +
+            (q.roundOff && Math.abs(q.roundOff) >= 0.01
+              ? '<tr><td colspan="7" style="text-align:right;font-size:0.9em;color:#6b7280;">Round Off</td><td style="text-align:right;font-size:0.9em;color:#6b7280;">' + (q.roundOff >= 0 ? '+' : '-') + fmtCurrency(Math.abs(q.roundOff)) + '</td></tr>'
+              : '') +
+            '<tr class="q-grand-total-row">' +
+              '<td colspan="7" style="text-align:right;">Grand Total</td>' +
+              '<td>' + fmtCurrency(q.grandTotal) + '</td>' +
+            '</tr>' +
+          '</tfoot>' +
+        '</table>';
+
+      // Business terms — "Business Terms" label matching PDF
+      var termsHtml = '';
+      if (q.businessTerms) {
+        termsHtml =
+          '<div class="q-section-label">Business Terms</div>' +
+          '<div class="q-terms">' + esc(q.businessTerms) + '</div>';
+      }
+
+      // Signature block — always use static asset
+      var signatureHtml =
+        '<div class="q-signature-block">' +
+          '<div class="q-signature-for">For ' + esc(companyName) + '</div>' +
+          '<img src="' + signatureSrc + '" alt="Signature" class="q-signature-img" onerror="this.style.display=\'none\'">' +
+          '<div class="q-signature-name">' + esc(signatory) + '</div>' +
+          '<div class="q-authorised-label">Authorised Signatory</div>' +
+        '</div>';
+
+      // Assemble — matches PDF layout order
+      // Page 1: letterhead + ref/date + customer + covering letter
+      // Page 2: letterhead repeat + quotation table + terms + signature
+      container.className = 'invoice-preview';
+      container.innerHTML =
+        letterheadHtml +
+        metaHtml +
+        customerHtml +
+        coveringLetterHtml +
+        '<div class="q-page-break"></div>' +
+        letterheadHtml +
+        metaHtml +
+        quotationTableTitle +
+        tableHtml +
+        termsHtml +
+        signatureHtml;
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DigiDat InfoSystems - Login</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <script src="js/server-session.js?v=20260328b"></script>
+</head>
+<body>
+  <header>
+    <img
+      class="site-header-logo"
+      src="assets/Logo.jpeg"
+      alt="DigiDat InfoSystems"
+      onerror="this.style.display='none'; this.nextElementSibling.style.display='block';"
+    >
+    <h1 class="site-header-fallback">DigiDat InfoSystems</h1>
+    <p>Invoice Portal Login</p>
+  </header>
+
+  <main class="container auth-container">
+    <section class="auth-card">
+      <h2>Sign In</h2>
+      <p class="auth-note">Enter username and password to access the invoice application.</p>
+      <p id="loginHint" class="auth-defaults"></p>
+
+      <form id="loginForm" class="auth-form">
+        <div class="form-group">
+          <label for="loginUsername">Username</label>
+          <input type="text" id="loginUsername" autocomplete="username" required>
+        </div>
+
+        <div class="form-group">
+          <label for="loginPassword">Password</label>
+          <input type="password" id="loginPassword" autocomplete="current-password" required>
+        </div>
+
+        <button type="submit" class="btn btn-primary auth-submit-btn">Login</button>
+      </form>
+
+      <p id="loginError" class="auth-error" aria-live="polite"></p>
+
+    </section>
+  </main>
+
+  <script src="js/file-storage-bridge.js?v=20260328b"></script>
+  <script src="js/auth.js?v=20260328b"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const forceLogin = window.ShakerServerSession?.prepareForcedLoginLaunch?.() === true;
+
+      if (!forceLogin && window.isAuthenticated && window.isAuthenticated()) {
+        window.location.replace('app.html');
+        return;
+      }
+
+      const form = document.getElementById('loginForm');
+      const usernameInput = document.getElementById('loginUsername');
+      const passwordInput = document.getElementById('loginPassword');
+      const errorEl = document.getElementById('loginError');
+      const hintEl = document.getElementById('loginHint');
+
+      const defaults = window.getAuthDefaults ? window.getAuthDefaults() : { username: 'admin', password: 'admin123' };
+      const credentials = window.getLoginCredentials ? window.getLoginCredentials() : defaults;
+
+      if (credentials.username === defaults.username && credentials.password === defaults.password) {
+        hintEl.textContent = `Default: ${defaults.username} / ${defaults.password}`;
+      } else {
+        hintEl.textContent = `Username: ${credentials.username} | Password: use your updated password`;
+      }
+
+      form.addEventListener('submit', (event) => {
+        event.preventDefault();
+        errorEl.textContent = '';
+
+        const username = usernameInput.value.trim();
+        const password = passwordInput.value;
+
+        if (!username || !password) {
+          errorEl.textContent = 'Enter username and password.';
+          return;
+        }
+
+        if (!window.validateLoginCredentials || !window.setAuthenticatedUser) {
+          errorEl.textContent = 'Login services are unavailable. Refresh and try again.';
+          return;
+        }
+
+        if (!window.validateLoginCredentials(username, password)) {
+          errorEl.textContent = 'Invalid username or password.';
+          return;
+        }
+
+        window.setAuthenticatedUser(username);
+        window.location.href = 'app.html';
+      });
+    });
+  </script>
+</body>
+</html>
