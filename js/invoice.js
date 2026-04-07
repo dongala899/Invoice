@@ -90,6 +90,7 @@ class Invoice {
       hsnSac,
       quantity: parsedQty,
       rate: parsedRate,
+      taxRate: (item.taxRate !== undefined && item.taxRate !== null) ? Number(item.taxRate) : 18,
       total: parsedQty * parsedRate
     };
 
@@ -122,19 +123,44 @@ class Invoice {
   }
 
   getCGST() {
-    return this.isIntraStateSale() ? this.getSubtotal() * 0.09 : 0;
+    if (!this.isIntraStateSale()) return 0;
+    return this.items.reduce((sum, item) => sum + (item.total * (item.taxRate / 2) / 100), 0);
   }
 
   getSGST() {
-    return this.isIntraStateSale() ? this.getSubtotal() * 0.09 : 0;
+    if (!this.isIntraStateSale()) return 0;
+    return this.items.reduce((sum, item) => sum + (item.total * (item.taxRate / 2) / 100), 0);
   }
 
   getIGST() {
-    return this.isInterStateSale() ? this.getSubtotal() * 0.18 : 0;
+    if (!this.isInterStateSale()) return 0;
+    return this.items.reduce((sum, item) => sum + (item.total * (item.taxRate) / 100), 0);
   }
 
   getTotalTax() {
     return this.getCGST() + this.getSGST() + this.getIGST();
+  }
+
+  getTaxBreakdown() {
+    const breakdown = {};
+    const isInter = this.isInterStateSale();
+
+    this.items.forEach(item => {
+      const rate = (item.taxRate !== undefined && item.taxRate !== null) ? item.taxRate : 18;
+      if (!breakdown[rate]) {
+        breakdown[rate] = { cgst: 0, sgst: 0, igst: 0, taxRate: rate };
+      }
+      
+      if (isInter) {
+        breakdown[rate].igst += (item.total * rate / 100);
+      } else {
+        const half = rate / 2;
+        breakdown[rate].cgst += (item.total * half / 100);
+        breakdown[rate].sgst += (item.total * half / 100);
+      }
+    });
+
+    return Object.values(breakdown).sort((a, b) => b.taxRate - a.taxRate);
   }
 
   getPreRoundGrandTotal() {

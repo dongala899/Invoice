@@ -1801,10 +1801,19 @@ header p {
 .invoice-table td:nth-child(5),
 .invoice-table td:nth-child(6),
 .invoice-table td:nth-child(7),
+.invoice-table td:nth-child(8),
 .items-table td:nth-child(4),
 .items-table td:nth-child(5),
 .items-table td:nth-child(6),
-.items-table td:nth-child(7) {
+.items-table td:nth-child(7),
+.items-table td:nth-child(8) {
+  text-align: right;
+  padding-right: 10px;
+  white-space: nowrap;
+}
+
+.invoice-table td:nth-child(3),
+.items-table td:nth-child(3) {
   text-align: center;
   white-space: nowrap;
 }
@@ -1825,66 +1834,74 @@ header p {
 .items-table td:nth-child(1),
 .invoice-table th:nth-child(1),
 .invoice-table td:nth-child(1) {
-  min-width: 56px;
+  width: 35px !important;
+  min-width: 35px !important;
 }
 
 .items-table th:nth-child(2),
 .items-table td:nth-child(2),
 .invoice-table th:nth-child(2),
 .invoice-table td:nth-child(2) {
-  min-width: 260px;
+  width: auto !important;
 }
 
 .items-table th:nth-child(3),
 .items-table td:nth-child(3),
 .invoice-table th:nth-child(3),
 .invoice-table td:nth-child(3) {
-  min-width: 72px;
-  width: 1%;
+  min-width: 50px !important;
+  width: 50px !important;
 }
 
 .items-table th:nth-child(4),
 .items-table td:nth-child(4),
 .invoice-table th:nth-child(4),
 .invoice-table td:nth-child(4) {
-  min-width: 58px;
-  width: 1%;
+  min-width: 35px !important;
+  width: 35px !important;
 }
 
 .items-table th:nth-child(5),
 .items-table td:nth-child(5),
 .invoice-table th:nth-child(5),
 .invoice-table td:nth-child(5) {
-  min-width: 96px;
-  width: 1%;
+  min-width: 35px !important;
+  width: 35px !important;
 }
 
 .items-table th:nth-child(6),
 .items-table td:nth-child(6),
 .invoice-table th:nth-child(6),
 .invoice-table td:nth-child(6) {
-  min-width: 82px;
-  width: 1%;
+  min-width: 60px !important;
+  width: 60px !important;
 }
 
 .items-table th:nth-child(7),
 .items-table td:nth-child(7),
 .invoice-table th:nth-child(7),
 .invoice-table td:nth-child(7) {
-  min-width: 94px;
-  width: 1%;
+  min-width: 60px !important;
+  width: 60px !important;
 }
 
 .items-table th:nth-child(8),
-.items-table td:nth-child(8) {
-  min-width: 68px;
-  width: 1%;
-  text-align: center;
+.items-table td:nth-child(8),
+.invoice-table th:nth-child(8),
+.invoice-table td:nth-child(8) {
+  min-width: 60px !important;
+  width: 60px !important;
+  text-align: right;
+  padding-right: 10px;
   white-space: nowrap;
 }
 
 .text-right {
   text-align: right;
+}
+
+.text-center {
+  text-align: center;
 }
 
 .item-subtext {
@@ -2224,7 +2241,8 @@ body.pdf-export-mode .invoice-table td:nth-child(3) {
 body.pdf-export-mode .invoice-table td:nth-child(4),
 body.pdf-export-mode .invoice-table td:nth-child(5),
 body.pdf-export-mode .invoice-table td:nth-child(6),
-body.pdf-export-mode .invoice-table td:nth-child(7) {
+body.pdf-export-mode .invoice-table td:nth-child(7),
+body.pdf-export-mode .invoice-table td:nth-child(8) {
   text-align: center;
 }
 
@@ -2393,11 +2411,12 @@ body.pdf-export-mode .copy-label {
     width: 100%;
     max-width: 100%;
     text-align: right !important;
-    font-size: 9.5px;
-    line-height: 1.15;
+    font-size: 12px;
+    line-height: 1.25;
     overflow-wrap: anywhere;
     word-break: break-word;
   }
+
 
   .invoice-details div,
   .invoice-details p {
@@ -2422,8 +2441,8 @@ body.pdf-export-mode .copy-label {
   .invoice-details div,
   .invoice-details p {
     margin-bottom: 1px;
-    font-size: 9.5px;
-    line-height: 1.15;
+    font-size: 12px;
+    line-height: 1.25;
     overflow-wrap: anywhere;
   }
 
@@ -2456,7 +2475,7 @@ body.pdf-export-mode .copy-label {
   }
 
   .invoice-table {
-    font-size: 10px;
+    font-size: 12px;
     table-layout: auto;
     width: 100%;
     border-collapse: collapse;
@@ -2480,20 +2499,46 @@ body.pdf-export-mode .copy-label {
 
   .invoice-table th:nth-child(1),
   .invoice-table td:nth-child(1) {
-    width: 6% !important;
+    width: 35px !important;
     text-align: center !important;
   }
 
   .invoice-table th:nth-child(2),
   .invoice-table td:nth-child(2) {
-    width: 36% !important;
+    width: auto !important;
     text-align: left !important;
     overflow-wrap: anywhere;
   }
 
   .invoice-table th:nth-child(3),
   .invoice-table td:nth-child(3) {
-    width: 12% !important;
+    width: 50px !important;
+    text-align: center !important;
+    white-space: nowrap;
+  }
+
+
+  .invoice-table th:nth-child(4),
+  .invoice-table td:nth-child(4) { width: 35px !important; }
+
+  .invoice-table th:nth-child(5),
+  .invoice-table td:nth-child(5) { 
+    width: 35px !important; 
+    text-align: center !important;
+  }
+
+  .invoice-table th:nth-child(6),
+  .invoice-table td:nth-child(6),
+  .invoice-table th:nth-child(7),
+  .invoice-table td:nth-child(7),
+  .invoice-table th:nth-child(8),
+  .invoice-table td:nth-child(8) {
+    width: 60px !important;
+  }
+
+
+  .invoice-table th:nth-child(3),
+  .invoice-table td:nth-child(3) {
     text-align: center !important;
     white-space: nowrap;
   }
@@ -2502,26 +2547,19 @@ body.pdf-export-mode .copy-label {
   .invoice-table th:nth-child(5),
   .invoice-table th:nth-child(6),
   .invoice-table th:nth-child(7),
-  .invoice-table td:nth-child(4),
-  .invoice-table td:nth-child(5),
-  .invoice-table td:nth-child(6),
-  .invoice-table td:nth-child(7) {
-    width: 11.5% !important;
-  }
-
-  .invoice-table th:nth-child(4),
-  .invoice-table th:nth-child(5),
-  .invoice-table th:nth-child(6),
-  .invoice-table th:nth-child(7) {
-    text-align: center !important;
+  .invoice-table th:nth-child(8) {
+    text-align: right !important;
+    padding-right: 10px !important;
     white-space: nowrap;
   }
 
   .invoice-table td:nth-child(4),
   .invoice-table td:nth-child(5),
   .invoice-table td:nth-child(6),
-  .invoice-table td:nth-child(7) {
-    text-align: center !important;
+  .invoice-table td:nth-child(7),
+  .invoice-table td:nth-child(8) {
+    text-align: right !important;
+    padding-right: 10px !important;
     white-space: nowrap;
   }
 
@@ -2532,7 +2570,9 @@ body.pdf-export-mode .copy-label {
   .totals-section {
     margin-top: 10px;
     margin-left: auto;
-    font-size: 10px;
+    margin-right: 0px !important;
+    font-size: 12px;
+    border-collapse: collapse !important;
   }
 
   .invoice-footer {

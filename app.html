@@ -343,6 +343,16 @@
                   <label for="rateInput">Rate per Unit (INR):</label>
                   <input type="number" id="rateInput" min="0" step="0.01" placeholder="0.00">
                 </div>
+                <div class="form-group" style="margin:0;">
+                  <label for="taxInput">Tax %:</label>
+                  <select id="taxInput">
+                    <option value="0">0%</option>
+                    <option value="5">5%</option>
+                    <option value="12">12%</option>
+                    <option value="18" selected>18%</option>
+                    <option value="28">28%</option>
+                  </select>
+                </div>
               </div>
 
 
@@ -361,6 +371,16 @@
                     <label for="newItemRate">Default Rate (INR) *</label>
                     <input type="number" id="newItemRate" min="0" step="0.01" placeholder="0.00"
                       oninput="syncNewItemRateToInvoice()">
+                  </div>
+                  <div class="form-group" style="margin:0;">
+                    <label for="newItemTax">Default Tax %</label>
+                    <select id="newItemTax">
+                      <option value="0">0%</option>
+                      <option value="5">5%</option>
+                      <option value="12">12%</option>
+                      <option value="18" selected>18%</option>
+                      <option value="28">28%</option>
+                    </select>
                   </div>
                   <div class="form-group" style="margin:0;grid-column:1/-1;">
                     <label for="newItemDescription">Description *</label>
@@ -387,6 +407,7 @@
                       <th>Item Description</th>
                       <th>HSN/SAC</th>
                       <th>Qty</th>
+                      <th>Tax %</th>
                       <th>Rate with Tax</th>
                       <th>Rate</th>
                       <th>Total</th>
@@ -395,7 +416,7 @@
                   </thead>
                   <tbody id="invoiceItemsTableBody">
                     <tr>
-                      <td colspan="8" style="text-align: center;">No items added yet</td>
+                      <td colspan="9" style="text-align: center;">No items added yet</td>
                     </tr>
                   </tbody>
                 </table>

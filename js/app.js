@@ -1264,14 +1264,15 @@ async function exportBasicPdfData() {
 
   const tableWidth = right - left;
   const columnWidths = {
-    sno: 10,
-    desc: 70,
-    hsn: 23,
-    qty: 12,
-    rate: 24,
-    rateTax: 24
+    sno: 8,
+    desc: 75,
+    hsn: 18,
+    qty: 10,
+    taxPercent: 10,
+    rate: 20,
+    rateTax: 20
   };
-  const fixedWidth = columnWidths.sno + columnWidths.desc + columnWidths.hsn + columnWidths.qty + columnWidths.rate + columnWidths.rateTax;
+  const fixedWidth = columnWidths.sno + columnWidths.desc + columnWidths.hsn + columnWidths.qty + columnWidths.taxPercent + columnWidths.rate + columnWidths.rateTax;
   columnWidths.amount = tableWidth - fixedWidth;
 
   const colStart = {
@@ -1279,21 +1280,17 @@ async function exportBasicPdfData() {
     desc: left + columnWidths.sno,
     hsn: left + columnWidths.sno + columnWidths.desc,
     qty: left + columnWidths.sno + columnWidths.desc + columnWidths.hsn,
-    rate: left + columnWidths.sno + columnWidths.desc + columnWidths.hsn + columnWidths.qty,
-    rateTax: left + columnWidths.sno + columnWidths.desc + columnWidths.hsn + columnWidths.qty + columnWidths.rate,
-    amount: left + columnWidths.sno + columnWidths.desc + columnWidths.hsn + columnWidths.qty + columnWidths.rate + columnWidths.rateTax
+    taxPercent: left + columnWidths.sno + columnWidths.desc + columnWidths.hsn + columnWidths.qty,
+    rate: left + columnWidths.sno + columnWidths.desc + columnWidths.hsn + columnWidths.qty + columnWidths.taxPercent,
+    rateTax: left + columnWidths.sno + columnWidths.desc + columnWidths.hsn + columnWidths.qty + columnWidths.taxPercent + columnWidths.rate,
+    amount: left + columnWidths.sno + columnWidths.desc + columnWidths.hsn + columnWidths.qty + columnWidths.taxPercent + columnWidths.rate + columnWidths.rateTax
   };
 
-  const colRight = {
-    qty: colStart.qty + columnWidths.qty - 1,
-    rate: colStart.rate + columnWidths.rate - 1,
-    rateTax: colStart.rateTax + columnWidths.rateTax - 1,
-    amount: right
-  };
   const colCenter = {
     sno: colStart.sno + (columnWidths.sno / 2),
     hsn: colStart.hsn + (columnWidths.hsn / 2),
     qty: colStart.qty + (columnWidths.qty / 2),
+    taxPercent: colStart.taxPercent + (columnWidths.taxPercent / 2),
     rate: colStart.rate + (columnWidths.rate / 2),
     rateTax: colStart.rateTax + (columnWidths.rateTax / 2),
     amount: colStart.amount + (columnWidths.amount / 2)
@@ -1306,6 +1303,7 @@ async function exportBasicPdfData() {
     line("Item Description", colStart.desc + 1, y);
     line("HSN/SAC", colCenter.hsn, y, "center");
     line("Qty", colCenter.qty, y, "center");
+    line("Tax %", colCenter.taxPercent, y, "center");
     line("Rate+Tax", colCenter.rate, y, "center");
     line("Rate", colCenter.rateTax, y, "center");
     line("Amount", colCenter.amount, y, "center");
@@ -1328,20 +1326,31 @@ async function exportBasicPdfData() {
     const safeItem = ensureInvoiceLineItem(item);
     const qty = safeNumber(item.quantity);
     const rate = safeNumber(item.rate);
-    const rateWithTax = rate * 1.18;
+    const itemTaxRate = typeof safeItem.taxRate !== 'undefined' ? safeItem.taxRate : 18;
+    const rateWithTax = rate * (1 + (itemTaxRate / 100));
+
     const amount = safeNumber(item.total);
     const descText = `${item.name || "-"}${item.description ? ` - ${item.description}` : ""}`;
     const descLines = doc.splitTextToSize(descText, columnWidths.desc - 2);
     const rowHeight = Math.max(5, descLines.length * 3.8);
     ensurePage(rowHeight + 2);
 
-    line(index + 1, colStart.sno + (columnWidths.sno / 2), y, "center");
+    line(index + 1, colCenter.sno, y, "center");
     doc.text(descLines, colStart.desc + 1, y);
-    line(String(safeItem.hsnSac || "-").slice(0, 18), colStart.hsn + (columnWidths.hsn / 2), y, "center");
-    line(qty || "-", colStart.qty + (columnWidths.qty / 2), y, "center");
-    line(formatMoneyForPDF(rateWithTax), colStart.rate + (columnWidths.rate / 2), y, "center");
-    line(formatMoneyForPDF(rate), colStart.rateTax + (columnWidths.rateTax / 2), y, "center");
-    line(formatMoneyForPDF(amount), colStart.amount + (columnWidths.amount / 2), y, "center");
+    line(String(safeItem.hsnSac || "-").slice(0, 18), colCenter.hsn, y, "center");
+    
+    // Use right alignment for all numeric columns to match totals
+    const qtyX = colStart.qty + columnWidths.qty - 2;
+    const taxX = colStart.taxPercent + columnWidths.taxPercent - 2;
+    const rateWithTaxX = colStart.rate + columnWidths.rate - 2;
+    const rateX = colStart.rateTax + columnWidths.rateTax - 2;
+    const amountX = colStart.amount + columnWidths.amount - 2.5;
+
+    line(qty || "-", qtyX, y, "right");
+    line(`${itemTaxRate}%`, taxX, y, "right");
+    line(formatMoneyForPDF(rateWithTax), rateWithTaxX, y, "right");
+    line(formatMoneyForPDF(rate), rateX, y, "right");
+    line(formatMoneyForPDF(amount), amountX, y, "right");
     y += rowHeight;
     doc.setDrawColor(228, 231, 235);
     doc.line(left, y, right, y);
@@ -1354,9 +1363,6 @@ async function exportBasicPdfData() {
   const totalsBoxRight = right;
   const totalsRowH = 5.5;
   const totalsBoxPaddingX = 2;
-  let totalsBoxLeft = right - 72;
-  let totalsLabelX = totalsBoxLeft + totalsBoxPaddingX;
-  let totalsAmountX = totalsBoxRight - totalsBoxPaddingX;
 
   function measurePdfTextWidth(text, fontSize, fontStyle = "normal") {
     const resolvedFontStyle = hasEmbeddedPdfFont
@@ -1370,34 +1376,37 @@ async function exportBasicPdfData() {
     return doc.getTextWidth(text);
   }
 
+  const totalsAmountColRightX = colStart.amount + columnWidths.amount - 2.5;
+  const totalsLabelColEndX = colStart.amount - 3;
+
   function drawPdfTotalsPair(label, amount, baselineY, labelFontStyle = "normal", amountFontStyle = "bold") {
-    const labelText = `${label}:`;
     setPdfFont(labelFontStyle);
-    doc.text(labelText, totalsLabelX, baselineY);
-    const resolvedAmountFontStyle = hasEmbeddedPdfFont
-      ? resolvePdfMoneyFontStyle(amount, amountFontStyle)
-      : amountFontStyle;
+    doc.text(`${label}:`, totalsLabelColEndX, baselineY, { align: "right" });
+    
+    setPdfFont(amountFontStyle || "bold");
     if (!hasEmbeddedPdfFont && pdfTextNeedsCanvasRender(amount)) {
-      drawPdfCanvasText(doc, amount, totalsAmountX, baselineY, {
+      drawPdfCanvasText(doc, amount, totalsAmountColRightX, baselineY, {
         align: "right",
         fontSize: doc.getFontSize(),
-        fontStyle: resolvedAmountFontStyle
+        fontStyle: amountFontStyle || "bold"
       });
       return;
     }
-    setPdfFont(resolvedAmountFontStyle);
-    doc.text(amount, totalsAmountX, baselineY, { align: "right" });
+    doc.text(amount, totalsAmountColRightX, baselineY, { align: "right" });
   }
 
   // Build rows
   const totalsRows = [];
   totalsRows.push({ label: 'Subtotal', amount: formatMoneyForPDF(invoice.getSubtotal()) });
-  if (isInterState) {
-    totalsRows.push({ label: 'IGST (18%)', amount: formatMoneyForPDF(invoice.getIGST()) });
-  } else {
-    totalsRows.push({ label: 'CGST (9%)', amount: formatMoneyForPDF(invoice.getCGST()) });
-    totalsRows.push({ label: 'SGST (9%)', amount: formatMoneyForPDF(invoice.getSGST()) });
-  }
+  invoice.getTaxBreakdown().forEach(b => {
+    if (isInterState) {
+      totalsRows.push({ label: `IGST (${b.taxRate}%)`, amount: formatMoneyForPDF(b.igst) });
+    } else {
+      const half = b.taxRate / 2;
+      totalsRows.push({ label: `CGST (${half}%)`, amount: formatMoneyForPDF(b.cgst) });
+      totalsRows.push({ label: `SGST (${half}%)`, amount: formatMoneyForPDF(b.sgst) });
+    }
+  });
   if (invoice.isRoundOffEnabled()) {
     totalsRows.push({ label: 'Total', amount: formatMoneyForPDF(invoice.getPreRoundGrandTotal()) });
     totalsRows.push({ label: 'Round Off', amount: formatMoneyForPDF(invoice.getRoundOffAmount()) });
@@ -1412,18 +1421,15 @@ async function exportBasicPdfData() {
   const grandTotalLabelWidth = measurePdfTextWidth('Grand Total:', 9, "bold");
   const grandTotalAmountWidth = measurePdfTextWidth(formatMoneyForPDF(invoice.getGrandTotal()), 9, "bold");
   const totalsLabelGap = 6;
-  const totalsBoxWidth = Math.max(widestRegularLabel, grandTotalLabelWidth)
-    + Math.max(widestRegularAmount, grandTotalAmountWidth)
-    + totalsLabelGap
-    + totalsBoxPaddingX * 2;
-  totalsBoxLeft = totalsBoxRight - totalsBoxWidth;
-  totalsLabelX = totalsBoxLeft + totalsBoxPaddingX;
-  totalsAmountX = totalsBoxRight - totalsBoxPaddingX;
+  const totalsBoxWidth = Math.max(widestRegularLabel + 4 + columnWidths.amount, grandTotalLabelWidth + 4 + columnWidths.amount);
+  const totalsBoxLeft = totalsBoxRight - totalsBoxWidth;
 
-  const boxHeight = totalsRows.length * totalsRowH + totalsRowH + 1; // rows + grand total row
+  const boxHeight = (totalsRows.length + 1) * totalsRowH + 1;
   doc.setDrawColor(180, 180, 180);
   doc.setLineWidth(0.3);
   doc.rect(totalsBoxLeft, y, totalsBoxWidth, boxHeight);
+  // Add vertical separator line between label and amount columns
+  doc.line(colStart.amount, y, colStart.amount, y + boxHeight);
 
   // Draw regular rows
   setPdfFont("normal");
@@ -1518,9 +1524,19 @@ async function exportBasicPdfData() {
 }
 
 function getInvoiceCopiesMarkup(invoiceHtml) {
-  const invLabelMarker = "<strong>INV No:</strong>";
-  const originalHtml = invoiceHtml.replace(invLabelMarker, "<strong>ORIGINAL INV No:</strong>");
-  const duplicateHtml = invoiceHtml.replace(invLabelMarker, "<strong>DUPLICATE INV No:</strong>");
+  const invLabelMarker = `<div><strong>INV No:</strong>`;
+  
+  // Render only the primary ORIGINAL label
+  const originalHtml = invoiceHtml.replace(
+    invLabelMarker, 
+    `<div class="copy-label-inline" style="font-weight:700;margin-bottom:4px;">ORIGINAL</div>${invLabelMarker}`
+  );
+  
+  // Render only the primary DUPLICATE label
+  const duplicateHtml = invoiceHtml.replace(
+    invLabelMarker, 
+    `<div class="copy-label-inline" style="font-weight:700;margin-bottom:4px;">DUPLICATE</div>${invLabelMarker}`
+  );
 
   return `
     <div class="print-copy">
@@ -5164,6 +5180,8 @@ function handleInvoiceItemSuggestionChange(event) {
     _invoiceSelectedItem = item;
     if (input) input.value = item.name;
     if (rateInput) rateInput.value = item.defaultRate;
+    const taxInput = document.getElementById('taxInput');
+    if (taxInput) taxInput.value = item.taxRate || 18;
     if (panel) panel.style.display = 'none';
   }
   hideInvoiceItemSuggestions();
@@ -5212,6 +5230,7 @@ async function saveNewItemAndAddToInvoice() {
   if (!rateVal || parseFloat(rateVal) <= 0) { alert('Rate must be greater than 0.'); document.getElementById('newItemRate').focus(); return; }
 
   const rate = parseFloat(rateVal);
+  const taxRate = parseFloat(document.getElementById('newItemTax').value) || 18;
 
   const duplicate = itemsData.find((i) => ensureCatalogItem(i).name.toLowerCase() === name.toLowerCase());
   if (duplicate) {
@@ -5225,7 +5244,8 @@ async function saveNewItemAndAddToInvoice() {
     name,
     description,
     hsnSac,
-    defaultRate: rate
+    defaultRate: rate,
+    taxRate: taxRate
   });
 
   itemsData.push(item);
@@ -5239,7 +5259,7 @@ async function saveNewItemAndAddToInvoice() {
   displayItemsList();
   checkIfReadyToStart();
 
-  const result = invoice.addItem(item, quantity, rate);
+  const result = invoice.addItem({ ...item, taxRate }, quantity, rate);
   if (result.merged) {
     alert(`"${item.name}" already exists in the invoice. Quantity updated to ${result.lineItem.quantity}.`);
   }
@@ -5287,8 +5307,9 @@ function addItemToInvoice() {
 
   const quantity = quantityInput.value;
   const rate = rateInput.value;
+  const taxRate = parseFloat(document.getElementById('taxInput').value) || 18;
 
-  const result = invoice.addItem(selectedItem, quantity, rate);
+  const result = invoice.addItem({ ...selectedItem, taxRate }, quantity, rate);
   if (result.merged) {
     alert(`"${selectedItem.name}" already exists in the invoice. Quantity updated to ${result.lineItem.quantity}.`);
   }
@@ -5304,13 +5325,15 @@ function renderItemsTable() {
   tableBody.innerHTML = '';
 
   if (invoice.items.length === 0) {
-    tableBody.innerHTML = '<tr><td colspan="8" style="text-align: center;">No items added yet</td></tr>';
+    tableBody.innerHTML = '<tr><td colspan="9" style="text-align: center;">No items added yet</td></tr>';
     return;
   }
 
   invoice.items.forEach((item, index) => {
     const safeItem = ensureInvoiceLineItem(item);
-    const rateWithTax = item.rate * 1.18;
+    const taxRate = typeof item.taxRate !== 'undefined' ? item.taxRate : 18;
+    const rateWithTax = item.rate * (1 + (taxRate / 100));
+    const TAX_RATES = [0, 5, 12, 18, 28];
     const row = document.createElement('tr');
     row.innerHTML = `
       <td>${index + 1}</td>
@@ -5327,6 +5350,11 @@ function renderItemsTable() {
           min="1"
           step="1"
           onchange="updateQuantity(${index}, this.value)">
+      </td>
+      <td class="text-center">
+        <select style="width:70px;" onchange="updateItemTaxRate(${index}, this.value)">
+          ${TAX_RATES.map((r) => `<option value="${r}"${r === taxRate ? ' selected' : ''}>${r}%</option>`).join('')}
+        </select>
       </td>
       <td class="text-right">${invoice.formatCurrency(rateWithTax)}</td>
       <td class="text-right">
@@ -5388,6 +5416,16 @@ function updateItemRate(index, newRate) {
   updateInvoicePreview();
 }
 
+function updateItemTaxRate(index, newRate) {
+  const taxRate = parseFloat(newRate);
+  const item = invoice.items[index];
+  if (!item) return;
+
+  item.taxRate = taxRate;
+  renderItemsTable();
+  updateInvoicePreview();
+}
+
 function updateItemDescription(index, newDescription) {
   const item = invoice.items[index];
   if (!item) return;
@@ -5423,8 +5461,15 @@ function updateInvoicePreview() {
   const roundOffAmount = invoice.getRoundOffAmount();
   const grandTotal = invoice.getGrandTotal();
   const grandTotalWords = numberToIndianWords(grandTotal);
-  const buildTotalsRowMarkup = (label, amount, rowClass = 'totals-row', rowStyle = 'border-bottom:1px solid #e5e7eb;', cellPadding = '4px 10px') =>
-    `<tr class="${rowClass}" style="${rowStyle}"><td class="totals-label-cell" style="padding:${cellPadding};padding-right:8px;text-align:left;white-space:nowrap;"><span class="total-label" style="font-size:inherit;line-height:1.2;font-weight:600;color:#111827;white-space:nowrap;">${label}:</span></td><td class="totals-amount-cell" style="padding:${cellPadding};padding-left:8px;text-align:right;white-space:nowrap;"><span class="total-amount" style="font-size:inherit;line-height:1.2;font-weight:700;color:#000;text-align:right;white-space:nowrap;">${amount}</span></td></tr>`;
+  const buildTotalsRowMarkup = (label, amount, rowClass = 'totals-row', rowStyle = 'background-color:#fff;', cellPadding = '4px 10px') =>
+    `<tr class="${rowClass}" style="${rowStyle}">
+      <td class="totals-label-cell" style="padding:${cellPadding};padding-right:8px;text-align:left;white-space:nowrap;border:1px solid #d1d5db;">
+        <span class="total-label" style="font-size:inherit;line-height:1.2;font-weight:600;color:#111827;white-space:nowrap;">${label}:</span>
+      </td>
+      <td class="totals-amount-cell" style="padding:${cellPadding};padding-right:10px;text-align:right;width:60px;white-space:nowrap;border:1px solid #d1d5db;">
+        <span class="total-amount" style="font-size:inherit;line-height:1.2;font-weight:700;color:#000;text-align:right;white-space:nowrap;">${amount}</span>
+      </td>
+    </tr>`;
   const isInterState = invoice.isInterStateSale();
   const poDateDisplay = invoice.poDate ? invoice.formatDate(invoice.poDate) : '-';
   const shippingAddress = String(invoice.shippingAddress || '').trim();
@@ -5432,13 +5477,15 @@ function updateInvoicePreview() {
   let itemsHTML = '';
   invoice.items.forEach((item, index) => {
     const safeItem = ensureInvoiceLineItem(item);
-    const rateWithTax = item.rate * 1.18;
+    const itemTaxRate = typeof item.taxRate !== 'undefined' ? item.taxRate : 18;
+    const rateWithTax = item.rate * (1 + (itemTaxRate / 100));
     itemsHTML += `
       <tr>
         <td>${index + 1}</td>
         <td><strong>${item.name}</strong><br><span class="item-subtext">${item.description || '-'}</span></td>
-        <td>${safeItem.hsnSac}</td>
+        <td class="text-center">${safeItem.hsnSac}</td>
         <td class="text-right">${item.quantity}</td>
+        <td class="text-right">${itemTaxRate}%</td>
         <td class="text-right">${invoice.formatCurrency(rateWithTax)}</td>
         <td class="text-right">${invoice.formatCurrency(item.rate)}</td>
         <td class="text-right">${invoice.formatCurrency(item.total)}</td>
@@ -5446,10 +5493,17 @@ function updateInvoicePreview() {
     `;
   });
 
-  const taxRowsHTML = isInterState
-    ? buildTotalsRowMarkup('IGST (18%)', invoice.formatCurrency(igst))
-    : `${buildTotalsRowMarkup('CGST (9%)', invoice.formatCurrency(cgst))}
-      ${buildTotalsRowMarkup('SGST (9%)', invoice.formatCurrency(sgst))}`;
+  const taxBreakdown = invoice.getTaxBreakdown();
+  let taxRowsHTML = '';
+  taxBreakdown.forEach(b => {
+    if (isInterState) {
+      taxRowsHTML += buildTotalsRowMarkup(`IGST (${b.taxRate}%)`, invoice.formatCurrency(b.igst));
+    } else {
+      const half = b.taxRate / 2;
+      taxRowsHTML += buildTotalsRowMarkup(`CGST (${half}%)`, invoice.formatCurrency(b.cgst));
+      taxRowsHTML += buildTotalsRowMarkup(`SGST (${half}%)`, invoice.formatCurrency(b.sgst));
+    }
+  });
   const roundOffRowHTML = invoice.isRoundOffEnabled()
     ? buildTotalsRowMarkup('Round Off', invoice.formatCurrency(roundOffAmount))
     : '';
@@ -5509,11 +5563,12 @@ function updateInvoicePreview() {
             <tr>
               <th>S.No</th>
               <th>Item Description</th>
-              <th>HSN/SAC</th>
-              <th>Qty</th>
-              <th>Rate with Tax</th>
-              <th>Rate</th>
-              <th>Amount</th>
+              <th class="text-center">HSN/SAC</th>
+              <th class="text-right">Qty</th>
+              <th class="text-right">Tax %</th>
+              <th class="text-right">Rate with Tax</th>
+              <th class="text-right">Rate</th>
+              <th class="text-right">Amount</th>
             </tr>
           </thead>
           <tbody>
@@ -5522,16 +5577,16 @@ function updateInvoicePreview() {
         </table>
       </div>
 
-      <table class="totals-section" style="border-collapse:collapse;margin-left:auto;font-size:10.5px;line-height:1.2;border:1px solid #d1d5db;border-radius:4px;overflow:hidden;">
+      <table class="totals-section" style="border-collapse:collapse;margin-left:auto;margin-right:0px;font-size:10.5px;line-height:1.2;border:none;overflow:visible;margin-top:10px;">
         ${buildTotalsRowMarkup('Subtotal', invoice.formatCurrency(subtotal))}
         ${taxRowsHTML}
         ${totalBeforeRoundOffRowHTML}
         ${roundOffRowHTML}
-        <tr class="grand-total-row" style="border-top:2px solid #1f2937;border-bottom:2px solid #1f2937;background-color:#f1f5f9;">
-          <td class="totals-label-cell" style="padding:6px 10px;padding-right:8px;text-align:left;white-space:nowrap;">
+        <tr class="grand-total-row" style="background-color:#f1f5f9;">
+          <td class="totals-label-cell" style="padding:6px 10px;padding-right:8px;text-align:left;white-space:nowrap;border:1px solid #d1d5db;">
             <span class="total-label" style="font-size:inherit;line-height:1.2;font-weight:700;color:#000;white-space:nowrap;">Grand Total:</span>
           </td>
-          <td class="totals-amount-cell" style="padding:6px 10px;padding-left:8px;text-align:right;white-space:nowrap;">
+          <td class="totals-amount-cell" style="padding:6px 10px;text-align:right;width:60px;white-space:nowrap;border:1px solid #d1d5db;border-bottom:2px solid #1f2937;">
             <span class="total-amount" style="font-size:inherit;line-height:1.2;font-weight:700;color:#000;text-align:right;white-space:nowrap;">${invoice.formatCurrency(grandTotal)}</span>
           </td>
         </tr>
@@ -5865,20 +5920,22 @@ function printInvoice() {
         .invoice-table th:nth-child(4),
         .invoice-table th:nth-child(5),
         .invoice-table th:nth-child(6),
-        .invoice-table th:nth-child(7) {
-          width: 11.5% !important;
-          text-align: center !important;
+        .invoice-table th:nth-child(7),
+        .invoice-table th:nth-child(8) {
+          text-align: right !important;
+          padding-right: 10px !important;
           white-space: nowrap;
         }
         .invoice-table td:nth-child(4),
         .invoice-table td:nth-child(5),
         .invoice-table td:nth-child(6),
-        .invoice-table td:nth-child(7) {
-          width: 11.5% !important;
-          text-align: center !important;
+        .invoice-table td:nth-child(7),
+        .invoice-table td:nth-child(8) {
+          text-align: right !important;
+          padding-right: 10px !important;
           white-space: nowrap;
         }
-        .totals-section { margin-left: auto; width: auto; min-width: 0; font-size: 10.5px; line-height: 1.2; }
+        .totals-section { margin-left: auto; margin-right: 0; width: auto; min-width: 0; font-size: 10.5px; line-height: 1.2; }
         .invoice-preview .totals-row,
         .invoice-preview .grand-total-row,
         .invoice-preview .totals-inline-cell,
